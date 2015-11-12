@@ -8,6 +8,8 @@ namespace WinTail
 {
     class Messages
     {
+        private Messages() { }
+
         #region Neutral/system messages
         public class ContinueProcessing { }
         #endregion
