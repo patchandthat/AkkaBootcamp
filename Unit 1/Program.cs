@@ -12,17 +12,13 @@ namespace WinTail
         {
             MyActorSystem = ActorSystem.Create("MyActorSystem");
 
-            Props consoleWriterProps = Props.Create(() => new ConsoleWriterActor());
-            IActorRef consoleWriterActor = MyActorSystem.ActorOf(consoleWriterProps, "ConsoleWriter");
+            IActorRef consoleWriterActor = MyActorSystem.ActorOf(Props.Create(() => new ConsoleWriterActor()), "ConsoleWriter");
 
-            Props tailCoordinatorProps = Props.Create(() => new TailCoordinatorActor());
-            IActorRef tailCoordinatorActor = MyActorSystem.ActorOf(tailCoordinatorProps, "TailCoordinatorActor");
+            IActorRef tailCoordinatorActor = MyActorSystem.ActorOf(Props.Create(() => new TailCoordinatorActor()), "TailCoordinatorActor");
+           
+            IActorRef validationActor = MyActorSystem.ActorOf(Props.Create(() => new FileValidationActor(consoleWriterActor)), "ValidationActor");
 
-            Props validationActorProps = Props.Create(() => new FileValidationActor(consoleWriterActor, tailCoordinatorActor));
-            IActorRef validationActor = MyActorSystem.ActorOf(validationActorProps, "ValidationActor");
-
-            Props consoleReaderProps = Props.Create<ConsoleReaderActor>(validationActor);
-            IActorRef consoleReaderActor = MyActorSystem.ActorOf(consoleReaderProps, "ConsoleReader");
+            IActorRef consoleReaderActor = MyActorSystem.ActorOf(Props.Create(() => new ConsoleReaderActor()), "ConsoleReader");
             
             consoleReaderActor.Tell(ConsoleReaderActor.StartCommand);
 
