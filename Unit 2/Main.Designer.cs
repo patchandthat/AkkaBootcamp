@@ -32,7 +32,7 @@
             System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.sysChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            this.btnCPU = new System.Windows.Forms.Button();
+            this.btnCpu = new System.Windows.Forms.Button();
             this.btnMem = new System.Windows.Forms.Button();
             this.btnDisk = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.sysChart)).BeginInit();
@@ -55,15 +55,15 @@
             this.sysChart.TabIndex = 0;
             this.sysChart.Text = "sysChart";
             // 
-            // btnCPU
+            // btnCpu
             // 
-            this.btnCPU.Location = new System.Drawing.Point(573, 286);
-            this.btnCPU.Name = "btnCPU";
-            this.btnCPU.Size = new System.Drawing.Size(92, 35);
-            this.btnCPU.TabIndex = 1;
-            this.btnCPU.Text = "CPU (ON)";
-            this.btnCPU.UseVisualStyleBackColor = true;
-            this.btnCPU.Click += new System.EventHandler(this.btnCPU_Click);
+            this.btnCpu.Location = new System.Drawing.Point(573, 286);
+            this.btnCpu.Name = "btnCpu";
+            this.btnCpu.Size = new System.Drawing.Size(92, 35);
+            this.btnCpu.TabIndex = 1;
+            this.btnCpu.Text = "CPU (ON)";
+            this.btnCpu.UseVisualStyleBackColor = true;
+            this.btnCpu.Click += new System.EventHandler(this.btnCPU_Click);
             // 
             // btnMem
             // 
@@ -92,7 +92,7 @@
             this.ClientSize = new System.Drawing.Size(684, 446);
             this.Controls.Add(this.btnDisk);
             this.Controls.Add(this.btnMem);
-            this.Controls.Add(this.btnCPU);
+            this.Controls.Add(this.btnCpu);
             this.Controls.Add(this.sysChart);
             this.Name = "Main";
             this.Text = "System Metrics";
@@ -106,7 +106,7 @@
         #endregion
 
         private System.Windows.Forms.DataVisualization.Charting.Chart sysChart;
-        private System.Windows.Forms.Button btnCPU;
+        private System.Windows.Forms.Button btnCpu;
         private System.Windows.Forms.Button btnMem;
         private System.Windows.Forms.Button btnDisk;
     }
