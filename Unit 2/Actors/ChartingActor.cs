@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace ChartApp.Actors
 {
-    public class ChartingActor : ReceiveActor
+    public class ChartingActor : ReceiveActor, IWithUnboundedStash
     {
         #region Messages
 
@@ -67,6 +67,15 @@ namespace ChartApp.Actors
         /// </summary>
         private int xPosCounter = 0;
 
+        /// <summary>
+        /// Gets or sets the stash. This will be automatically populated by the framework AFTER the constructor has been run.
+        ///             Implement this as an auto property.
+        /// </summary>
+        /// <value>
+        /// The stash.
+        /// </value>
+        public IStash Stash { get; set; }
+
         public ChartingActor(Chart chart, Button pauseButton) : this(chart, new Dictionary<string, Series>(), pauseButton)
         {
         }
@@ -96,11 +105,16 @@ namespace ChartApp.Actors
 
         private void Paused()
         {
+            Receive<AddSeries>(msg => Stash.Stash());
+            Receive<RemoveSeries>(msg => Stash.Stash());
+
             Receive<Metric>(metric => HandleMetricsPaused(metric));
             Receive<TogglePause>(pause =>
             {
                 SetPauseButtonText(false);
                 UnbecomeStacked();
+
+                Stash.UnstashAll();
             });
         }
 
@@ -206,5 +220,7 @@ namespace ChartApp.Actors
         }
 
         #endregion
+
+        
     }
 }
