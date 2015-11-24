@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Windows.Forms;
 using Akka.Actor;
 using Akka.Routing;
 
@@ -8,7 +9,7 @@ namespace GithubActors.Actors
     /// <summary>
     /// Top-level actor responsible for coordinating and launching repo-processing jobs
     /// </summary>
-    public class GithubCommanderActor : ReceiveActor
+    public class GithubCommanderActor : ReceiveActor, IWithUnboundedStash
     {
         #region Message classes
 
@@ -47,17 +48,44 @@ namespace GithubActors.Actors
         private IActorRef _coordinator;
         private IActorRef _canAcceptJobSender;
 
+        private int _pendingJobReplies;
+        
+        public IStash Stash { get; set; }
+
         public GithubCommanderActor()
+        {
+            Ready();
+        }
+
+        private void Ready()
         {
             Receive<CanAcceptJob>(job =>
             {
-                _canAcceptJobSender = Sender;
                 _coordinator.Tell(job);
+
+                BecomeAsking();
             });
+        }
+
+        private void BecomeAsking()
+        {
+            _canAcceptJobSender = Sender;
+            _pendingJobReplies = 3; //routees
+            Become(Asking);
+        }
+
+        private void Asking()
+        {
+            Receive<CanAcceptJob>(job => Stash.Stash());
 
             Receive<UnableToAcceptJob>(job =>
             {
-                _canAcceptJobSender.Tell(job);
+                _pendingJobReplies--;
+                if (_pendingJobReplies == 0)
+                {
+                    _canAcceptJobSender.Tell(job);
+                    BecomeReady();
+                }
             });
 
             Receive<AbleToAcceptJob>(job =>
@@ -72,9 +100,20 @@ namespace GithubActors.Actors
             });
         }
 
+        private void BecomeReady()
+        {
+            Become(Ready);
+            Stash.UnstashAll();
+        }
+
         protected override void PreStart()
         {
-            _coordinator = Context.ActorOf(Props.Create(() => new GithubCoordinatorActor()), ActorPaths.GithubCoordinatorActor.Name);
+            int i = 0;
+            var c1 = Context.ActorOf(Props.Create(() => new GithubCoordinatorActor()), $"{ActorPaths.GithubCoordinatorActor.Name}{++i}");
+            var c2 = Context.ActorOf(Props.Create(() => new GithubCoordinatorActor()), $"{ActorPaths.GithubCoordinatorActor.Name}{++i}");
+            var c3 = Context.ActorOf(Props.Create(() => new GithubCoordinatorActor()), $"{ActorPaths.GithubCoordinatorActor.Name}{++i}");
+
+            _coordinator = Context.ActorOf(Props.Empty.WithRouter(new BroadcastGroup(new []{c1,c2,c3})));
             base.PreStart();
         }
 
