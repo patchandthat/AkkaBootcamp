@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Akka.Actor;
 using Akka.Routing;
+using System.Linq;
 
 namespace GithubActors.Actors
 {
@@ -70,7 +71,7 @@ namespace GithubActors.Actors
         private void BecomeAsking()
         {
             _canAcceptJobSender = Sender;
-            _pendingJobReplies = 3; //routees
+            _pendingJobReplies = _coordinator.Ask<Routees>(new GetRoutees()).Result.Members.Count();
             Become(Asking);
         }
 
@@ -108,12 +109,10 @@ namespace GithubActors.Actors
 
         protected override void PreStart()
         {
-            int i = 0;
-            var c1 = Context.ActorOf(Props.Create(() => new GithubCoordinatorActor()), $"{ActorPaths.GithubCoordinatorActor.Name}{++i}");
-            var c2 = Context.ActorOf(Props.Create(() => new GithubCoordinatorActor()), $"{ActorPaths.GithubCoordinatorActor.Name}{++i}");
-            var c3 = Context.ActorOf(Props.Create(() => new GithubCoordinatorActor()), $"{ActorPaths.GithubCoordinatorActor.Name}{++i}");
-
-            _coordinator = Context.ActorOf(Props.Empty.WithRouter(new BroadcastGroup(new []{c1,c2,c3})));
+            _coordinator =
+                Context.ActorOf(Props.Create(() => new GithubCoordinatorActor())
+                    .WithRouter(FromConfig.Instance),
+                    ActorPaths.GithubCoordinatorActor.Name);
             base.PreStart();
         }
 
